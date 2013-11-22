@@ -1,0 +1,5 @@
+useDynLib(bestSubsets)
+exportPattern("^[[:alpha:]]+")
+
+import(Rcpp)
+

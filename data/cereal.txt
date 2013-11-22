@@ -1,0 +1,12 @@
+Cereal                Calories   Fat  Sodium  Sugar  Fiber
+MiniWheats                200    1.0       5     12      6 
+GoldenGr                  120    1.0     280     11      1 
+HFWheaties                110    0.0     200     12      0 
+RiceKrispies              120    0.0     350      3      0 
+FrenchToastCr.            120    1.0     180     12      0 
+NuttyNuggets              170    1.0     210      3      5 
+HoneyCrCornflakes         120    1.0     210     10      1 
+RiceChex                  120    0.0     290      2      0 
+RiceKrispTreats           120    1.5     190      9      0 
+AllBran                   100    1.0     150      0     15 
+DinosaurEggsOatmeal       200    4.0     240     16      3 

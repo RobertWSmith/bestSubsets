@@ -1,0 +1,16 @@
+Package: bestSubsets
+Type: Package
+Title: Best Subset Regression
+Version: 1.0
+Date: 2013-11-17
+Author: Robert Smith <rws20@zips.uakron.edu>
+Maintainer: Robert Smith <rws20@zips.uakron.edu>
+Description: Performs best subset regression utilizing openMP to speed up
+    variable selection.
+License: GPL-3
+Depends:
+    Rcpp (>= 0.10.6),
+    RcppArmadillo (>= 0.3.920.3),
+    methods (>= 3.0.2)
+LinkingTo: Rcpp, RcppArmadillo
+RcppModules: Regression
