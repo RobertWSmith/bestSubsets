@@ -17,7 +17,7 @@ loadModule("Regression")
 #' @method Regression is
 #' @export
 is.Regression <- function(obj) {
-  return (inherits(obj, ".__C__Rcpp_Regression"))
+  return (inherits(obj, "Rcpp_Regression"))
 }
 
 #' Linear Regression Object initializer

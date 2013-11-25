@@ -5,6 +5,9 @@
 #include "combination.hpp"
 using boost::next_combination;
 
+#include "model.hpp"
+#include <map>
+#include <string>
 #include <vector>
 #include <RcppCommon.h>
 
@@ -15,6 +18,7 @@ namespace Rcpp {
   template<> Regression as(SEXP);
 }
 
+// [[depends(RcppArmadillo)]]
 #include <RcppArmadillo.h>
 
 //' @name Regression Class
@@ -37,13 +41,15 @@ public:
   Regression(SEXP);
   
   operator SEXP();
+  
   Rcpp::NumericMatrix getPredictors();
   Rcpp::NumericVector getOutput();
   void setOutput(Rcpp::NumericVector output_);
   void setPredictors(Rcpp::NumericMatrix predictors_);
-  Rcpp::List OLS(std::vector<int> columns);
-  Rcpp::List GLS(std::vector<int> columns);
-  Rcpp::List bestSubset();
+  
+  Model OLS(std::vector<int> columns);
+  Model GLS(std::vector<int> columns);
+  Model bestSubset();
 };
 
 #endif /* OLS_HPP */

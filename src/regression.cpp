@@ -1,17 +1,23 @@
 
 // header library for determining the next combination using itertors
 #include "combination.hpp"
+using boost::next_combination;
+
 #include "regression.hpp"
+#include "model.hpp"
 
 // [[depends(RcppArmadillo)]]
 #include <RcppArmadillo.h>
 #include <vector>
+#include <array>
+
+#include <map>
+#include <string>
 
 #ifdef _OPENMP
 #include <omp.h>
 #endif
 
-using boost::next_combination;
 using namespace Rcpp;
 
 Regression::Regression() : 
@@ -54,37 +60,34 @@ void Regression::setPredictors(NumericMatrix predictors_) {
   predictors.reset(); // erases any previous data
   
   int r = predictors_.nrow();
-  int c = predictors_.ncol();
   
   // concatenate a vector of ones to enable models other than zero-intercept
   arma::colvec ones_vec = arma::ones<arma::colvec>(r); 
-  arma::mat temp = as<arma::mat>(predictors_); 
+  arma::mat temp = as<arma::mat>(predictors_);
 
   temp.insert_cols(0, ones_vec); 
   predictors = temp; 
   
   column_iter.clear(); // erases any previous data
-  for (int i=1; i <= predictors.n_cols; i++) column_iter.push_back(i);
+  for (size_t i=1; i <= predictors.n_cols; i++) column_iter.push_back(i);
 }
 
-List Regression::OLS(std::vector<int> columns) {
+Model Regression::OLS(std::vector<int> columns) {
   BEGIN_RCPP
   
-  std::vector<int> cRegression = columns;
+  arma::uvec cols;
+  cols << 0;
   
-  // ensure the first column is included
-  columns.emplace(columns.begin(), 0); 
-  
-  // subset the predictors
-  arma::mat preds = predictors.col(0);
-  for (size_t i = 0; i < cRegression.size(); i++) {
-    preds.insert_cols(i, predictors.col(cRegression[i]));
+  for (size_t i = 0; i < columns.size(); i++) {
+    cols << columns[i];
   }
-  
+
+  arma::mat preds = predictors.cols(cols);
+
   int n_obs = preds.n_rows, n_preds = preds.n_cols;
   
-  arma::colvec coef = arma::solve(predictors, output);
-  arma::colvec resid = output - predictors * coef;
+  arma::colvec coef = arma::inv(preds.t() * preds) * preds.t() * output;
+  arma::colvec resid = output - preds * coef;
   arma::mat rss = resid.t() * resid;
   
   double sse = arma::as_scalar(resid.t() * resid)/(n_obs - n_preds);
@@ -94,7 +97,7 @@ List Regression::OLS(std::vector<int> columns) {
 
   
   return List::create(
-    _["variables"] = cRegression,
+    _["variables"] = cols,
     _["beta"] = coef,
     _["residuals"] = resid,
     _["RSE"] = resid,
@@ -104,19 +107,19 @@ List Regression::OLS(std::vector<int> columns) {
   END_RCPP
 }
 
-List Regression::GLS(std::vector<int> columns) {
+Model Regression::GLS(std::vector<int> columns) {
   return List::create(_["nil"] = 0 );
 }
 
-List Regression::bestSubset() {
+Model Regression::bestSubset() {
   BEGIN_RCPP
   
   std::vector<int> temp_cols;
   List best, temp;
-  best = List::create(_["aic"] = -1);
+  best = List::create(_["aic"] = -100);
   double best_aic, temp_aic;
   
-  for (int k = 1; k <= predictors.n_cols; k++ ) {
+  for (size_t k = 1; k <= predictors.n_cols; k++ ) {
     temp_cols.clear();
     
     do {
@@ -128,14 +131,13 @@ List Regression::bestSubset() {
       best_aic = best["aic"];
       temp_aic = temp["aic"];
       
-      if (best_aic <= -0.5) {
+      if (best_aic <= -1) {
         best = temp;
       } else if (temp_aic < best_aic) {
           best = temp;
       }
     } while(next_combination(column_iter.begin(), column_iter.begin() + k, column_iter.end()));
   }
-  
   
   END_RCPP
 }
